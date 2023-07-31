@@ -2,10 +2,10 @@ import react from 'react';
 import {useState, useEffect} from 'react';
 import Plot from 'react-plotly.js';
 import Searchstock from './SearchStock';
+import Dropdown from './Dropdown';
 
-//Add input for stock name
 //add drop down for interval change
-//
+//add drop down for period of time
 
 const Stock = () => {
 
@@ -14,15 +14,34 @@ const Stock = () => {
     let xHolder = [];
     let yHolder = [];
 
-    const [stockData, setStockData] = useState([]);
+    const [index, setIndex] = useState('Time Series (Daily)');
     const [symbol, setSymbol] = useState('');
+    const [series, setSeries] = useState('TIME_SERIES_DAILY');
 
-    let API_CALL = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&interval=5min&outputsize=compact&apikey=YSL9IRXC7HE5FMTG`;
+    const list = [
+        {title: 'Daily',
+        value: 'TIME_SERIES_DAILY',
+        index: 'Time Series (Daily)'
+        },
+        {title: 'Weekly',
+        value: 'TIME_SERIES_WEEKLY',
+        index: "Weekly Time Series"},
+        {title: 'Monthly',
+        value: 'TIME_SERIES_MONTHLY',
+        index: "Monthly Time Series"}
+    ];
+
+    let API_CALL = `https://www.alphavantage.co/query?function=${series}&symbol=${symbol}&outputsize=compact&apikey=YSL9IRXC7HE5FMTG`;
 
 
     const updateTicker = (inSymbol) => {
         setSymbol(inSymbol);
-        console.log(symbol);
+    }
+
+    const updateSeries = (seriess, index) => {
+        setSeries(seriess);
+        setIndex(index);
+        console.log(series);
     }
 
 
@@ -41,10 +60,10 @@ const Stock = () => {
             return response.json();
         })
         .then( (data) => {
-            setStockData(data);
-            for(var key in data["Time Series (Daily)"]){
+        
+            for(var key in data[index]){
                 xHolder.push(key);
-                yHolder.push(data["Time Series (Daily)"][key]['1. open']);
+                yHolder.push(data[index][key]['1. open']);
             }
             
             setX(xHolder);
@@ -72,6 +91,8 @@ const Stock = () => {
             marker: {color: 'red'},
           }]}
           ></Plot>
+
+          <Dropdown menu = {list} itemSelectCallBack={updateSeries}></Dropdown>
 
           <button onClick= {fetchStock}></button>
         </div>
